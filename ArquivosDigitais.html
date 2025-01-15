@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vincular Arquivo Digital</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="modal-page">
+    <div class="modal-wrapper">
+        <div class="modal-content compact">
+            <!-- Cabeçalho -->
+            <div class="modal-header">
+                <div class="header-title">
+                    <i class='bx bx-file'></i>
+                    <h3>Vincular Arquivo Digital</h3>
+                </div>
+                <button class="close-button" onclick="fecharModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <!-- Corpo -->
+            <div class="modal-body">
+                <form id="formArquivosDigitais" onsubmit="return vincularArquivos(event)">
+                    <!-- Tipo de Documento -->
+                    <div class="form-section">
+                        <div class="select-field">
+                            <label for="tipoDocumento">Tipo de Documento</label>
+                            <select id="tipoDocumento" required onchange="atualizarTipoDocumento()">
+                                <option value="">Selecione o tipo de documento...</option>
+                                <optgroup label="Nota Fiscal Eletrônica">
+                                    <option value="XML_NFE">XML NF-e</option>
+                                    <option value="PDF_NFE">PDF NF-e (DANFE)</option>
+                                </optgroup>
+                                <optgroup label="Conhecimento de Transporte">
+                                    <option value="XML_CTE">XML CT-e</option>
+                                    <option value="PDF_CTE">PDF CT-e (DACTE)</option>
+                                </optgroup>
+                                <optgroup label="Documentos Complementares">
+                                    <option value="COMPROVANTE">Comprovante de Descarga</option>
+                                    <option value="FATURA">Fatura/Boleto</option>
+                                    <option value="OUTROS">Outros Documentos</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Arquivos -->
+                    <div class="form-section">
+                        <div class="file-grid">
+                            <div class="file-input-group">
+                                <label for="arquivoXml">
+                                    <i class='bx bx-code-alt'></i>
+                                    XML
+                                </label>
+                                <input type="file" 
+                                       id="arquivoXml" 
+                                       accept=".xml"
+                                       onchange="validarArquivo(this, 'XML')">
+                                <span class="file-info" id="xmlInfo">Nenhum arquivo</span>
+                            </div>
+                            <div class="file-input-group">
+                                <label for="arquivoPdf">
+                                    <i class='bx bxs-file-pdf'></i>
+                                    PDF
+                                </label>
+                                <input type="file" 
+                                       id="arquivoPdf" 
+                                       accept=".pdf"
+                                       onchange="validarArquivo(this, 'PDF')">
+                                <span class="file-info" id="pdfInfo">Nenhum arquivo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="form-section">
+                        <div class="textarea-field">
+                            <label for="observacoes">Observações</label>
+                            <textarea id="observacoes" 
+                                    rows="2" 
+                                    maxlength="200"
+                                    placeholder="Observações sobre os arquivos..."></textarea>
+                            <div class="char-counter">0/200</div>
+                        </div>
+                    </div>
+
+                    <!-- Rodapé -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="fecharModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnVincular" disabled>
+                            <i class='bx bx-link'></i>
+                            Vincular
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let arquivosValidos = {
+            xml: false,
+            pdf: false
+        };
+
+        let configuracaoDocumento = {
+            requerXml: false,
+            requerPdf: false,
+            titulo: ''
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Desabilita o botão inicialmente
+            document.getElementById('btnVincular').disabled = true;
+            
+            // Preenche o tipo de documento se recebido via URL
+            const params = new URLSearchParams(window.location.search);
+            const tipoDoc = params.get('tipo');
+            const chave = params.get('chave');
+            
+            if (tipoDoc) {
+                const select = document.getElementById('tipoDocumento');
+                // Determina o valor correto baseado no tipo recebido
+                const valor = tipoDoc.toUpperCase() === 'NFE' ? 'XML_NFE' : 
+                             tipoDoc.toUpperCase() === 'CTE' ? 'XML_CTE' : '';
+                select.value = valor;
+                atualizarTipoDocumento();
+            }
+            
+            if (chave) {
+                document.getElementById('chaveDocumento').value = chave;
+            }
+
+            // Esconde inicialmente os campos de arquivo
+            document.querySelectorAll('.file-input-group').forEach(group => {
+                group.style.display = 'none';
+            });
+        });
+
+        function atualizarTipoDocumento() {
+            const tipoSelecionado = document.getElementById('tipoDocumento').value;
+            const xmlGroup = document.querySelector('.file-input-group:first-child');
+            const pdfGroup = document.querySelector('.file-input-group:last-child');
+            
+            // Reseta os arquivos
+            document.getElementById('arquivoXml').value = '';
+            document.getElementById('arquivoPdf').value = '';
+            arquivosValidos.xml = false;
+            arquivosValidos.pdf = false;
+            
+            // Configura baseado no tipo selecionado
+            switch(tipoSelecionado) {
+                case 'XML_NFE':
+                case 'XML_CTE':
+                    configuracaoDocumento = {
+                        requerXml: true,
+                        requerPdf: false,
+                        titulo: 'XML ' + (tipoSelecionado === 'XML_NFE' ? 'NF-e' : 'CT-e')
+                    };
+                    xmlGroup.style.display = 'block';
+                    pdfGroup.style.display = 'none';
+                    break;
+                    
+                case 'PDF_NFE':
+                case 'PDF_CTE':
+                case 'COMPROVANTE':
+                case 'FATURA':
+                case 'OUTROS':
+                    configuracaoDocumento = {
+                        requerXml: false,
+                        requerPdf: true,
+                        titulo: getTipoDocumentoTitulo(tipoSelecionado)
+                    };
+                    xmlGroup.style.display = 'none';
+                    pdfGroup.style.display = 'block';
+                    break;
+                    
+                default:
+                    configuracaoDocumento = {
+                        requerXml: false,
+                        requerPdf: false,
+                        titulo: ''
+                    };
+                    xmlGroup.style.display = 'none';
+                    pdfGroup.style.display = 'none';
+            }
+            
+            atualizarBotaoVincular();
+        }
+
+        function getTipoDocumentoTitulo(tipo) {
+            const titulos = {
+                'PDF_NFE': 'DANFE',
+                'PDF_CTE': 'DACTE',
+                'COMPROVANTE': 'Comprovante de Descarga',
+                'FATURA': 'Fatura/Boleto',
+                'OUTROS': 'Documento Complementar'
+            };
+            return titulos[tipo] || '';
+        }
+
+        function atualizarBotaoVincular() {
+            const btnVincular = document.getElementById('btnVincular');
+            const tipoSelecionado = document.getElementById('tipoDocumento').value;
+            
+            // Verifica requisitos baseado na configuração
+            const xmlValido = !configuracaoDocumento.requerXml || arquivosValidos.xml;
+            const pdfValido = !configuracaoDocumento.requerPdf || arquivosValidos.pdf;
+            
+            // Remove a verificação de observações
+            btnVincular.disabled = !(
+                tipoSelecionado && 
+                xmlValido && 
+                pdfValido
+            );
+
+            // Atualiza o texto do botão
+            if (btnVincular.disabled) {
+                let mensagem = [];
+                if (configuracaoDocumento.requerXml && !arquivosValidos.xml) mensagem.push('XML');
+                if (configuracaoDocumento.requerPdf && !arquivosValidos.pdf) mensagem.push('PDF');
+                if (!tipoSelecionado) mensagem.push('tipo de documento');
+                
+                btnVincular.title = `Falta: ${mensagem.join(', ')}`;
+            } else {
+                btnVincular.title = 'Clique para vincular os arquivos';
+            }
+        }
+
+        function validarArquivo(input, tipo) {
+            const file = input.files[0];
+            const infoSpan = document.getElementById(`${tipo.toLowerCase()}Info`);
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            
+            if (!file) {
+                infoSpan.textContent = 'Nenhum arquivo';
+                infoSpan.className = 'file-info';
+                arquivosValidos[tipo.toLowerCase()] = false;
+                atualizarBotaoVincular();
+                return;
+            }
+
+            // Validar extensão
+            const extensao = tipo === 'XML' ? '.xml' : '.pdf';
+            if (!file.name.toLowerCase().endsWith(extensao)) {
+                infoSpan.textContent = `Arquivo inválido (deve ser ${extensao})`;
+                infoSpan.className = 'file-info error';
+                arquivosValidos[tipo.toLowerCase()] = false;
+                atualizarBotaoVincular();
+                return;
+            }
+
+            // Validar tamanho
+            if (file.size > maxSize) {
+                infoSpan.textContent = 'Arquivo muito grande (máx: 5MB)';
+                infoSpan.className = 'file-info error';
+                arquivosValidos[tipo.toLowerCase()] = false;
+                atualizarBotaoVincular();
+                return;
+            }
+
+            // Arquivo válido
+            infoSpan.textContent = `${file.name} (${formatarTamanho(file.size)})`;
+            infoSpan.className = 'file-info success';
+            arquivosValidos[tipo.toLowerCase()] = true;
+            atualizarBotaoVincular();
+        }
+
+        function formatarTamanho(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function vincularArquivos(event) {
+            event.preventDefault();
+            
+            const btnVincular = document.getElementById('btnVincular');
+            const tipoDocumento = document.getElementById('tipoDocumento').value;
+            const observacoes = document.getElementById('observacoes').value;
+            
+            btnVincular.disabled = true;
+            btnVincular.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>Processando...';
+
+            // Simula o envio
+            setTimeout(() => {
+                // Envia mensagem para a janela principal
+                window.opener.postMessage({
+                    tipo: 'arquivosVinculados',
+                    status: 'success',
+                    dados: {
+                        documentoChave: document.querySelector('input[name="chaveDocumento"]').value,
+                        tipoDocumento: tipoDocumento,
+                        observacoes: observacoes,
+                        arquivos: {
+                            xml: document.getElementById('arquivoXml').files[0]?.name,
+                            pdf: document.getElementById('arquivoPdf').files[0]?.name
+                        }
+                    }
+                }, '*');
+                
+                fecharModal();
+            }, 1000);
+
+            return false;
+        }
+
+        // Monitora mudanças nas observações
+        document.getElementById('observacoes').addEventListener('input', function(e) {
+            const maxLength = this.getAttribute('maxlength');
+            const currentLength = this.value.length;
+            
+            // Atualiza apenas o contador
+            this.nextElementSibling.textContent = `${currentLength}/${maxLength}`;
+        });
+
+        function fecharModal() {
+            window.close();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocFiscal - Redirecionando...</title>
+    <script>
+        // Verifica se está logado
+        const usuarioLogado = JSON.parse(
+            localStorage.getItem('usuarioLogado') || 
+            sessionStorage.getItem('usuarioLogado')
+        );
+        
+        // Redireciona baseado no status do login
+        if (usuarioLogado && usuarioLogado.token && usuarioLogado.expiraEm > new Date().getTime()) {
+            window.location.href = 'menu.html';
+        } else {
+            // Limpa qualquer sessão expirada
+            localStorage.removeItem('usuarioLogado');
+            sessionStorage.removeItem('usuarioLogado');
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+    <noscript>
+        <meta http-equiv="refresh" content="0;url=login.html">
+        Se você não for redirecionado automaticamente, <a href="login.html">clique aqui</a>.
+    </noscript>
+</body>
+</html> 

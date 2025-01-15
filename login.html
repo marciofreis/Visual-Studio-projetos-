@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocFiscal - Login</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .input-field input.valid {
+            border-color: #10b981;
+        }
+
+        .input-field input.invalid {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .error-message.success {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .login-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Logo e Título -->
+            <div class="login-header">
+                <i class='bx bx-shield-quarter'></i>
+                <h2>DocFiscal</h2>
+                <p>Sistema de Documentos Fiscais</p>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form id="loginForm" onsubmit="return fazerLogin(event)">
+                <div class="input-group">
+                    <div class="input-field">
+                        <i class='bx bx-user'></i>
+                        <input type="text" 
+                               id="username" 
+                               placeholder="Usuário"
+                               required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-field">
+                        <i class='bx bx-lock-alt'></i>
+                        <input type="password" 
+                               id="password" 
+                               placeholder="Senha"
+                               required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class='bx bx-show'></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="error-message" id="error-message"></div>
+
+                <button type="submit" class="login-button" id="loginButton">
+                    <i class='bx bx-log-in'></i>
+                    <span>Entrar</span>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>© 2024 DocFiscal</p>
+                <small>Versão 1.0.0</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Limpa qualquer sessão anterior
+            localStorage.removeItem('usuarioLogado');
+            sessionStorage.removeItem('usuarioLogado');
+
+            const form = document.getElementById('loginForm');
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const btnLogin = document.getElementById('loginButton');
+
+            form.onsubmit = function(event) {
+                event.preventDefault();
+                
+                const usernameValue = username.value.trim();
+                const passwordValue = password.value.trim();
+                
+                // Validações básicas
+                if (!usernameValue || !passwordValue) {
+                    mostrarErro('Preencha todos os campos');
+                    return;
+                }
+
+                // Mostra loading
+                btnLogin.disabled = true;
+                btnLogin.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Entrando...';
+
+                // Simula autenticação
+                setTimeout(() => {
+                    if (usernameValue === 'admin' && passwordValue === 'admin123') {
+                        const dadosUsuario = {
+                            username: usernameValue,
+                            nome: 'Administrador',
+                            cargo: 'Admin',
+                            token: 'token123',
+                            expiraEm: new Date().getTime() + (8 * 60 * 60 * 1000)
+                        };
+
+                        // Salva dados do usuário
+                        localStorage.setItem('usuarioLogado', JSON.stringify(dadosUsuario));
+                        
+                        // Redireciona diretamente para o menu
+                        window.location.href = 'menu.html';
+                    } else {
+                        mostrarErro('Usuário ou senha incorretos');
+                        password.value = '';
+                        btnLogin.disabled = false;
+                        btnLogin.innerHTML = '<i class="bx bx-log-in"></i> Entrar';
+                    }
+                }, 1000);
+            };
+        });
+
+        function mostrarErro(mensagem) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.className = 'error-message error';
+            errorMessage.textContent = mensagem;
+            errorMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.className = 'bx bx-hide';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.className = 'bx bx-show';
+            }
+        }
+    </script>
+</body>
+</html>

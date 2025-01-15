@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocFiscal - Sistema de Documentos Fiscais</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="with-sidebar">
+    <!-- Menu Lateral -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Logo e Nome do Sistema -->
+        <div class="sidebar-header">
+            <i class='bx bx-shield-quarter'></i>
+            <span class="sidebar-title">DocFiscal</span>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class='bx bx-chevron-left'></i>
+            </button>
+        </div>
+
+        <!-- Menu de Navegação -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <!-- Dashboard -->
+                <li>
+                    <a href="#" class="nav-link active" data-page="dashboard">
+                        <i class='bx bx-grid-alt'></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <!-- Documentos Fiscais -->
+                <li class="nav-section">
+                    <span class="nav-section-title">Documentos Fiscais</span>
+                    <a href="#" class="nav-link" data-page="nfe">
+                        <i class='bx bx-receipt'></i>
+                        <span>NF-e</span>
+                        <div class="nav-info">
+                            <span class="nav-badge success">12</span>
+                        </div>
+                    </a>
+                    <a href="#" class="nav-link" data-page="cte">
+                        <i class='bx bx-car'></i>
+                        <span>CT-e</span>
+                        <div class="nav-info">
+                            <span class="nav-badge warning">8</span>
+                        </div>
+                    </a>
+                </li>
+
+                <!-- Arquivos -->
+                <li class="nav-section">
+                    <span class="nav-section-title">Arquivos</span>
+                    <a href="#" class="nav-link" data-page="upload">
+                        <i class='bx bx-upload'></i>
+                        <span>Upload</span>
+                    </a>
+                    <a href="#" class="nav-link" data-page="gerenciar">
+                        <i class='bx bx-folder'></i>
+                        <span>Gerenciar</span>
+                    </a>
+                </li>
+
+                <!-- Configurações -->
+                <li class="nav-section">
+                    <span class="nav-section-title">Sistema</span>
+                    <a href="#" class="nav-link" data-page="perfil">
+                        <i class='bx bx-user'></i>
+                        <span>Perfil</span>
+                    </a>
+                    <a href="#" class="nav-link" data-page="config">
+                        <i class='bx bx-cog'></i>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Rodapé do Menu -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" 
+                     alt="User" class="user-avatar">
+                <div class="user-details">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-role">Admin</span>
+                </div>
+            </div>
+            <button class="logout-button" onclick="fazerLogout()">
+                <i class='bx bx-log-out'></i>
+                <span>Sair</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <!-- Cabeçalho -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class='bx bx-menu'></i>
+                </button>
+                <div class="breadcrumb">
+                    <i class='bx bx-home'></i>
+                    <span id="pageTitle">Dashboard</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" placeholder="Buscar...">
+                </div>
+                <div class="header-actions">
+                    <button class="header-button" title="Notificações" onclick="toggleNotifications()">
+                        <i class='bx bx-bell'></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="header-user" onclick="toggleUserMenu()">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" 
+                             alt="User">
+                        <div class="user-menu" id="userMenu">
+                            <div class="user-menu-header">
+                                <strong>Administrador</strong>
+                                <small>admin@exemplo.com</small>
+                            </div>
+                            <hr>
+                            <a href="#" data-page="perfil">
+                                <i class='bx bx-user-circle'></i>
+                                Meu Perfil
+                            </a>
+                            <a href="#" data-page="config">
+                                <i class='bx bx-cog'></i>
+                                Configurações
+                            </a>
+                            <hr>
+                            <a href="#" onclick="fazerLogout()" class="text-danger">
+                                <i class='bx bx-log-out'></i>
+                                Sair
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Área de Conteúdo -->
+        <div class="content-wrapper" id="mainContent">
+            <!-- O conteúdo será carregado aqui -->
+        </div>
+    </main>
+
+    <script>
+        // Verificação simples de autenticação
+        const usuarioLogado = JSON.parse(
+            localStorage.getItem('usuarioLogado') || 
+            sessionStorage.getItem('usuarioLogado')
+        );
+
+        if (!usuarioLogado || !usuarioLogado.token) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Sistema de Documentos Fiscais</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="with-sidebar">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class='bx bx-shield-quarter'></i>
+            <span class="sidebar-title">DocFiscal</span>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class='bx bx-chevron-left'></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <!-- Dashboard -->
+                <li>
+                    <a href="PainelDocs.html" class="nav-link active">
+                        <i class='bx bx-grid-alt'></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <!-- Documentos Fiscais -->
+                <li class="nav-section">
+                    <span class="nav-section-title">Documentos Fiscais</span>
+                    <a href="PainelDocs.html?tipo=nfe" class="nav-link">
+                        <i class='bx bx-receipt'></i>
+                        <span>NF-e</span>
+                        <span class="nav-badge">12</span>
+                    </a>
+                    <a href="PainelDocs.html?tipo=cte" class="nav-link">
+                        <i class='bx bx-car'></i>
+                        <span>CT-e</span>
+                        <span class="nav-badge">8</span>
+                    </a>
+                </li>
+
+                <!-- Arquivos -->
+                <li class="nav-section">
+                    <span class="nav-section-title">Arquivos</span>
+                    <a href="#" class="nav-link">
+                        <i class='bx bx-upload'></i>
+                        <span>Upload</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class='bx bx-folder'></i>
+                        <span>Gerenciar</span>
+                    </a>
+                </li>
+
+                <!-- Configurações -->
+                <li class="nav-section">
+                    <span class="nav-section-title">Sistema</span>
+                    <a href="#" class="nav-link">
+                        <i class='bx bx-user'></i>
+                        <span>Perfil</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class='bx bx-cog'></i>
+                        <span>Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Footer do Menu -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" 
+                     alt="User" class="user-avatar">
+                <div class="user-details">
+                    <span class="user-name" id="userName">Administrador</span>
+                    <span class="user-role">Admin</span>
+                </div>
+            </div>
+            <button class="logout-button" onclick="fazerLogout()">
+                <i class='bx bx-log-out'></i>
+                <span>Sair</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <header class="top-header">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class='bx bx-menu'></i>
+            </button>
+            
+            <div class="breadcrumb">
+                <i class='bx bx-home'></i>
+                <span>Dashboard</span>
+            </div>
+
+            <div class="header-actions">
+                <button class="header-button" title="Notificações">
+                    <i class='bx bx-bell'></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="header-button" title="Ajuda">
+                    <i class='bx bx-help-circle'></i>
+                </button>
+                <div class="header-user">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" 
+                         alt="User">
+                </div>
+            </div>
+        </header>
+
+        <div class="content-wrapper" id="mainContent">
+            <!-- O conteúdo será carregado aqui -->
+        </div>
+    </main>
+
+    <script>
+        // Função para alternar o menu lateral
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-collapsed');
+        }
+
+        // Função para fazer logout
+        function fazerLogout() {
+            localStorage.removeItem('usuarioLogado');
+            sessionStorage.removeItem('usuarioLogado');
+            window.location.href = 'login.html';
+        }
+
+        // Verifica autenticação ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            const usuarioLogado = JSON.parse(
+                localStorage.getItem('usuarioLogado') || 
+                sessionStorage.getItem('usuarioLogado')
+            );
+            
+            if (!usuarioLogado) {
+                window.location.href = 'login.html';
+            } else {
+                document.getElementById('userName').textContent = usuarioLogado.nome;
+            }
+
+            // Marca o item ativo no menu
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Atualiza o breadcrumb conforme a navegação
+        function atualizarBreadcrumb(titulo) {
+            const breadcrumb = document.querySelector('.breadcrumb span');
+            breadcrumb.textContent = titulo;
+        }
+    </script>
+</body>
+</html>
